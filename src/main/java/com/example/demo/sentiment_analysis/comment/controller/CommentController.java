@@ -2,7 +2,6 @@ package com.example.demo.sentiment_analysis.comment.controller;
 
 import com.example.demo.sentiment_analysis.error_dto.ApiResponse;
 import com.example.demo.sentiment_analysis.comment.comment_request.CommentRequest;
-import com.example.demo.sentiment_analysis.comment.model.Comment;
 import com.example.demo.sentiment_analysis.comment.service.CommentService;
 import com.example.demo.sentiment_analysis.comment.comment_response.CommentResponseDto;
 import com.example.demo.sentiment_analysis.slice_response_dto.PaginatedResponse;
@@ -33,7 +32,7 @@ public class CommentController {
         User principal = (User) authentication.getPrincipal();
 
         PaginatedResponse<CommentResponseDto> comments =
-                commentService.getCommentByEmail(principal.getUsername(), pageable);
+                commentService.getCommentByUserName(principal.getUsername(), pageable);
         ApiResponse<PaginatedResponse<CommentResponseDto>> response =
                 new ApiResponse<>("Comment fetched successfully", comments, null);
 

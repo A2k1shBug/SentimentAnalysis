@@ -30,7 +30,7 @@ public class UserController {
         Users user = userService.getCurrentUser(principal.getUsername());
         CurrentUserResponse response = new CurrentUserResponse(
                 user.getId().toHexString(),
-                user.getUserEmail(),
+                user.getUserName(),
                 user.getRoles()
         );
         return ResponseEntity.ok(response);

@@ -61,7 +61,7 @@ class PostRealtimePublisherTest {
 
         assertEquals(postId.toHexString(), payload.getPostId());
         assertEquals("COMMENT_CREATED", payload.getEventType());
-        assertEquals("user@example.com", payload.getActorEmail());
+        assertEquals("user@example.com", payload.getUserName());
         assertEquals(3L, payload.getCommentCount());
         assertEquals(5L, payload.getReactionCount());
         assertNotNull(payload.getEmittedAt());

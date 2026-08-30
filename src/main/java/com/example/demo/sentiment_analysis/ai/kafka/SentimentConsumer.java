@@ -4,7 +4,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import com.example.demo.sentiment_analysis.ai.service.SentimentAiService;
 import com.example.demo.sentiment_analysis.ai.SentimentResult;
-import com.example.demo.sentiment_analysis.ai.enumeration.SentimentType;
 import com.example.demo.sentiment_analysis.comment.repository.CommentRepo;
 import com.example.demo.sentiment_analysis.comment.model.Comment;
 import com.example.demo.sentiment_analysis.redis.service.RedisService;

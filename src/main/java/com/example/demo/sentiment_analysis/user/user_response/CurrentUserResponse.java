@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CurrentUserResponse {
     private String id;
-    private String userEmail;
+    private String userName;
     private List<String> roles;
 }
 

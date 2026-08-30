@@ -34,7 +34,7 @@ public class FrontControllerOfPosts {
         User principal = (User) authentication.getPrincipal();
 
         PaginatedResponse<PostResponseDto> posts =
-                logicOfSentiment.getPostsByUserEmail(principal.getUsername(), pageable);
+                logicOfSentiment.getPostsByUserName(principal.getUsername(), pageable);
 
         ApiResponse<PaginatedResponse<PostResponseDto>> response =
                 new ApiResponse<>("Posts fetched successfully", posts, null);

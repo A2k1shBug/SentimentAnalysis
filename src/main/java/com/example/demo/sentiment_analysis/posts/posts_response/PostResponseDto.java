@@ -11,10 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDto {
+
     private String postId;
     private String title;
     private String text;
-    private String userEmail;
+    private String userName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createAt;
     private long commentCount;

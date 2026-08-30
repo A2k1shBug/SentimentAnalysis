@@ -49,7 +49,7 @@ public class UserService {
         Slice<Users> slice = userRepo.findAll(pageable);
         List<UserResponse> content = slice.getContent().stream()
                 .map(user -> new UserResponse(
-                        user.getUserEmail(),
+                        user.getUserName(),
                         user.getDateTime()
                 ))
                 .toList();
@@ -71,7 +71,7 @@ public class UserService {
         Users users = new Users();
         users.setRoles(List.of("USER"));
         users.setPassword(encoder.encode(userInfo.getPassword()));
-        users.setUserEmail(userInfo.getUserEmail());
+        users.setUserName(userInfo.getUserName());
         users.setDateTime(LocalDateTime.now());
         return userRepo.save(users);
 
@@ -120,7 +120,7 @@ public class UserService {
         try {
             Users user = userRepo.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
-            if (!user.getUserEmail().equals(currentEmail)) {
+            if (!user.getUserName().equals(currentEmail)) {
                 throw new AccessDeniedException("Cannot delete other account");
             }
             userRepo.deleteById(userId);
@@ -139,11 +139,11 @@ public class UserService {
         try {
             Users user = userRepo.findById(id)
                     .orElseThrow(() -> new UserNotFoundException("User is not found"));
-            if (!user.getUserEmail().equals(currentEmail)) {
+            if (!user.getUserName().equals(currentEmail)) {
                 throw new AccessDeniedException("Cannot update other account");
             }
-            if (usersDto.getUserEmail() != null && !usersDto.getUserEmail().isEmpty()) {
-                user.setUserEmail(usersDto.getUserEmail());
+            if (usersDto.getUserName() != null && !usersDto.getUserName().isEmpty()) {
+                user.setUserName(usersDto.getUserName());
             }
 
             if (usersDto.getPassword() != null && !usersDto.getPassword().isEmpty()) {
@@ -159,7 +159,7 @@ public class UserService {
     }
 
     public Users getCurrentUser(String currentEmail) {
-        Users user = userRepo.findByUserEmail(currentEmail);
+        Users user = userRepo.findByUserName(currentEmail);
         if (user == null) {
             throw new UserNotFoundException("User is not found");
         }

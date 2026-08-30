@@ -39,7 +39,7 @@ class UserDetailsServiceImplTest {
                 List.of("USER", "ADMIN")
         );
 
-        when(userRepo.findByUserEmail("admin@example.com")).thenReturn(user);
+        when(userRepo.findByUserName("admin@example.com")).thenReturn(user);
 
         UserDetails result = userDetailsService.loadUserByUsername("admin@example.com");
 
@@ -49,12 +49,12 @@ class UserDetailsServiceImplTest {
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_USER")));
         assertTrue(result.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")));
-        verify(userRepo).findByUserEmail("admin@example.com");
+        verify(userRepo).findByUserName("admin@example.com");
     }
 
     @Test
     void loadUserByUsernameThrowsUsernameNotFoundExceptionWhenUserDoesNotExist() {
-        when(userRepo.findByUserEmail("missing@example.com")).thenReturn(null);
+        when(userRepo.findByUserName("missing@example.com")).thenReturn(null);
 
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
@@ -62,6 +62,6 @@ class UserDetailsServiceImplTest {
         );
 
         assertEquals("User Not found exception", exception.getMessage());
-        verify(userRepo).findByUserEmail("missing@example.com");
+        verify(userRepo).findByUserName("missing@example.com");
     }
 }

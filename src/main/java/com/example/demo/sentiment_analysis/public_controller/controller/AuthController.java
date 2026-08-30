@@ -58,19 +58,19 @@ public class AuthController {
     public ResponseEntity<Object> login(@Valid @RequestBody UserDto userDto) {
         try {
             authenticationManager.authenticate
-                    (new UsernamePasswordAuthenticationToken(userDto.getUserEmail(),
+                    (new UsernamePasswordAuthenticationToken(userDto.getUserName(),
                             userDto.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userDto.getUserEmail());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userDto.getUserName());
             String accessToken = jwtUtil.generateToken(userDetails.getUsername());
 
             String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
 
-            Users user = userRepo.findByUserEmail(userDto.getUserEmail());
+            Users user = userRepo.findByUserName(userDto.getUserName());
 
             RefreshToken refreshTokenEntity = new RefreshToken();
             refreshTokenEntity.setUserId(user.getId());
 
-            refreshTokenEntity.setUserEmail(user.getUserEmail());
+            refreshTokenEntity.setUserName(user.getUserName());
 
             refreshTokenEntity.setRefreshToken(refreshToken);
 

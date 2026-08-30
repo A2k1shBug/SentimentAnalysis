@@ -86,7 +86,7 @@ class LogicOfPostsTest {
         when(redisService.get(eq("feed:viewer@example.com:page:0:size:5"), any(TypeReference.class)))
                 .thenReturn(cachedResponse);
 
-        PaginatedResponse<PostResponseDto> result = logicOfPosts.getPostsByUserEmail("viewer@example.com", pageable);
+        PaginatedResponse<PostResponseDto> result = logicOfPosts.getPostsByUserName("viewer@example.com", pageable);
 
         assertSame(cachedResponse, result);
         verifyNoInteractions(userRepo, postsRepo, commentRepo, reactionRepo);
@@ -104,20 +104,20 @@ class LogicOfPostsTest {
 
         when(redisService.get(eq("feed:viewer@example.com:page:0:size:5"), any(TypeReference.class)))
                 .thenReturn(null);
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(currentUser);
         when(postsRepo.findByTypeOrUserId(TypeOfAccess.PUBLIC, userId, pageable))
                 .thenReturn(new SliceImpl<>(List.of(post), pageable, false));
         when(userRepo.findById(userId)).thenReturn(Optional.of(currentUser));
         when(commentRepo.countByPostId(postId)).thenReturn(4L);
         when(reactionRepo.countByPostId(postId)).thenReturn(5L);
 
-        PaginatedResponse<PostResponseDto> result = logicOfPosts.getPostsByUserEmail("viewer@example.com", pageable);
+        PaginatedResponse<PostResponseDto> result = logicOfPosts.getPostsByUserName("viewer@example.com", pageable);
 
         assertEquals(1, result.getContent().size());
         assertEquals(postId.toHexString(), result.getContent().get(0).getPostId());
         assertEquals("Feed title", result.getContent().get(0).getTitle());
         assertEquals("Feed content", result.getContent().get(0).getText());
-        assertEquals("viewer@example.com", result.getContent().get(0).getUserEmail());
+        assertEquals("viewer@example.com", result.getContent().get(0).getUserName());
         assertEquals(4L, result.getContent().get(0).getCommentCount());
         assertEquals(5L, result.getContent().get(0).getReactionCount());
         assertEquals(0, result.getPageNumber());
@@ -134,11 +134,11 @@ class LogicOfPostsTest {
 
         when(redisService.get(eq("feed:missing@example.com:page:0:size:5"), any(TypeReference.class)))
                 .thenReturn(null);
-        when(userRepo.findByUserEmail("missing@example.com")).thenReturn(null);
+        when(userRepo.findByUserName("missing@example.com")).thenReturn(null);
 
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
-                () -> logicOfPosts.getPostsByUserEmail("missing@example.com", pageable)
+                () -> logicOfPosts.getPostsByUserName("missing@example.com", pageable)
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -153,7 +153,7 @@ class LogicOfPostsTest {
         PostDto postDto = new PostDto(null, "New title", "New content", TypeOfAccess.PRIVATE);
         Posts savedPost = new Posts(new ObjectId(), userId, "New title", "New content", TypeOfAccess.PRIVATE, LocalDateTime.now());
 
-        when(userRepo.findByUserEmail("author@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("author@example.com")).thenReturn(currentUser);
         when(postsRepo.save(any(Posts.class))).thenReturn(savedPost);
 
         Posts result = logicOfPosts.createPostForUser(postDto, "author@example.com");
@@ -176,7 +176,7 @@ class LogicOfPostsTest {
         Users currentUser = user(userId, "author@example.com");
         Posts post = new Posts(postId, userId, "Title", "Content", TypeOfAccess.PUBLIC, LocalDateTime.now());
 
-        when(userRepo.findByUserEmail("author@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("author@example.com")).thenReturn(currentUser);
         when(postsRepo.findById(postId)).thenReturn(Optional.of(post));
 
         logicOfPosts.removePost(postId, "author@example.com");
@@ -190,7 +190,7 @@ class LogicOfPostsTest {
     void removePostThrowsPostsNotFoundExceptionWhenPostDoesNotExist() {
         ObjectId postId = new ObjectId();
 
-        when(userRepo.findByUserEmail("author@example.com")).thenReturn(user(new ObjectId(), "author@example.com"));
+        when(userRepo.findByUserName("author@example.com")).thenReturn(user(new ObjectId(), "author@example.com"));
         when(postsRepo.findById(postId)).thenReturn(Optional.empty());
 
         PostsNotFoundException exception = assertThrows(
@@ -209,7 +209,7 @@ class LogicOfPostsTest {
         Users currentUser = user(new ObjectId(), "viewer@example.com");
         Posts post = new Posts(postId, new ObjectId(), "Title", "Content", TypeOfAccess.PUBLIC, LocalDateTime.now());
 
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(currentUser);
         when(postsRepo.findById(postId)).thenReturn(Optional.of(post));
 
         AccessDeniedException exception = assertThrows(
@@ -229,7 +229,7 @@ class LogicOfPostsTest {
         Posts existingPost = new Posts(postId, userId, "Old title", "Old content", TypeOfAccess.PUBLIC, LocalDateTime.now().minusDays(1));
         PostDto postDto = new PostDto(postId, "Updated title", "Updated content", TypeOfAccess.PUBLIC);
 
-        when(userRepo.findByUserEmail("author@example.com")).thenReturn(user(userId, "author@example.com"));
+        when(userRepo.findByUserName("author@example.com")).thenReturn(user(userId, "author@example.com"));
         when(postsRepo.findById(postId)).thenReturn(Optional.of(existingPost));
         when(postsRepo.save(existingPost)).thenReturn(existingPost);
 
@@ -246,7 +246,7 @@ class LogicOfPostsTest {
         ObjectId postId = new ObjectId();
         PostDto postDto = new PostDto(postId, "Updated title", "Updated content", TypeOfAccess.PUBLIC);
 
-        when(userRepo.findByUserEmail("author@example.com")).thenReturn(user(new ObjectId(), "author@example.com"));
+        when(userRepo.findByUserName("author@example.com")).thenReturn(user(new ObjectId(), "author@example.com"));
         when(postsRepo.findById(postId)).thenReturn(Optional.empty());
 
         PostsNotFoundException exception = assertThrows(
@@ -263,7 +263,7 @@ class LogicOfPostsTest {
         ObjectId postId = new ObjectId();
         PostDto postDto = new PostDto(postId, "Updated title", "Updated content", TypeOfAccess.PUBLIC);
 
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(user(new ObjectId(), "viewer@example.com"));
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(user(new ObjectId(), "viewer@example.com"));
         when(postsRepo.findById(postId)).thenReturn(Optional.of(
                 new Posts(postId, new ObjectId(), "Old title", "Old content", TypeOfAccess.PUBLIC, LocalDateTime.now())
         ));
@@ -296,7 +296,7 @@ class LogicOfPostsTest {
         Comment comment = new Comment(new ObjectId(), commentUserId, postId, "Nice post", SentimentType.POSITIVE, 0.92, commentUpdatedAt);
         Reaction reaction = new Reaction(new ObjectId(), reactionUserId, postId, ReactionType.LIKE, reactionCreatedAt);
 
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(currentUser);
         when(postsRepo.findById(postId)).thenReturn(Optional.of(post));
         when(userRepo.findById(postOwnerId)).thenReturn(Optional.of(postOwner));
         when(commentRepo.countByPostId(postId)).thenReturn(1L);
@@ -311,13 +311,13 @@ class LogicOfPostsTest {
         assertEquals(postId.toHexString(), result.getPost().getPostId());
         assertEquals("Test title", result.getPost().getTitle());
         assertEquals("Test content", result.getPost().getText());
-        assertEquals("author@example.com", result.getPost().getUserEmail());
+        assertEquals("author@example.com", result.getPost().getUserName());
         assertEquals(1L, result.getPost().getCommentCount());
         assertEquals(1L, result.getPost().getReactionCount());
         assertEquals("Nice post", result.getComments().get(0).getText());
-        assertEquals("commenter@example.com", result.getComments().get(0).getUserEmail());
+        assertEquals("commenter@example.com", result.getComments().get(0).getUserName());
         assertEquals("LIKE", result.getReactions().get(0).getReactionType());
-        assertEquals("reactor@example.com", result.getReactions().get(0).getUserEmail());
+        assertEquals("reactor@example.com", result.getReactions().get(0).getUserName());
     }
 
     @Test
@@ -325,7 +325,7 @@ class LogicOfPostsTest {
         ObjectId postId = new ObjectId();
         Users currentUser = new Users(new ObjectId(), "viewer@example.com", "password", LocalDateTime.now(), List.of("USER"));
 
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(currentUser);
         when(postsRepo.findById(postId)).thenReturn(Optional.empty());
 
         PostsNotFoundException exception = assertThrows(
@@ -346,7 +346,7 @@ class LogicOfPostsTest {
         Users currentUser = new Users(currentUserId, "viewer@example.com", "password", LocalDateTime.now(), List.of("USER"));
         Posts privatePost = new Posts(postId, postOwnerId, "Private title", "Private content", TypeOfAccess.PRIVATE, LocalDateTime.now());
 
-        when(userRepo.findByUserEmail("viewer@example.com")).thenReturn(currentUser);
+        when(userRepo.findByUserName("viewer@example.com")).thenReturn(currentUser);
         when(postsRepo.findById(postId)).thenReturn(Optional.of(privatePost));
 
         AccessDeniedException exception = assertThrows(
@@ -362,7 +362,7 @@ class LogicOfPostsTest {
     void getPostDetailThrowsUserNotFoundExceptionWhenCurrentUserDoesNotExist() {
         ObjectId postId = new ObjectId();
 
-        when(userRepo.findByUserEmail("missing@example.com")).thenReturn(null);
+        when(userRepo.findByUserName("missing@example.com")).thenReturn(null);
 
         UserNotFoundException exception = assertThrows(
                 UserNotFoundException.class,

@@ -23,7 +23,7 @@ public class RefreshToken {
 
     private ObjectId userId;
 
-    private String userEmail;
+    private String userName;
 
     @Indexed(expireAfterSeconds = 0)
     private Date expiresAt;

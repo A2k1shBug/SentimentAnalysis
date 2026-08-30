@@ -44,8 +44,8 @@ public class LogicOfPosts {
         this.redisService = redisService;
     }
 
-    public PaginatedResponse<PostResponseDto> getPostsByUserEmail(String userEmail, Pageable pageable) {
-        String cacheKey = feedCacheKey(userEmail, pageable);
+    public PaginatedResponse<PostResponseDto> getPostsByUserName(String userName, Pageable pageable) {
+        String cacheKey = feedCacheKey(userName, pageable);
         PaginatedResponse<PostResponseDto> cachedResponse = redisService.get(cacheKey,
                         new TypeReference<PaginatedResponse<PostResponseDto>>() {
                 });
@@ -54,7 +54,7 @@ public class LogicOfPosts {
             return cachedResponse;
         }
 
-        Users currentUser = userRepo.findByUserEmail(userEmail);
+        Users currentUser = userRepo.findByUserName(userName);
 
         if (currentUser == null) {
             throw new UsernameNotFoundException("User not found");
@@ -73,7 +73,7 @@ public class LogicOfPosts {
                             post.getId().toHexString(),
                             post.getTitle(),
                             post.getContent(),
-                            postOwner != null ? postOwner.getUserEmail() : "unknown",
+                            postOwner != null ? postOwner.getUserName() : "unknown",
                             post.getCreateAt(),
                             commentRepo.countByPostId(post.getId()),
                             reactionRepo.countByPostId(post.getId())
@@ -96,8 +96,8 @@ public class LogicOfPosts {
     }
 
     @Transactional
-    public Posts createPostForUser(PostDto postDto, String currentUserEmail) {
-        Users currentUser = userRepo.findByUserEmail(currentUserEmail);
+    public Posts createPostForUser(PostDto postDto, String currentUserName) {
+        Users currentUser = userRepo.findByUserName(currentUserName);
         Posts posts = new Posts();
         posts.setType(postDto.getTypeOfAccess());
         posts.setUserId(currentUser.getId());
@@ -108,9 +108,9 @@ public class LogicOfPosts {
         return postsRepo.save(posts);
     }
 
-    public void removePost(ObjectId id, String userEmail) throws AccessDeniedException {
+    public void removePost(ObjectId id, String userName) throws AccessDeniedException {
 
-        Users currentUser = userRepo.findByUserEmail(userEmail);
+        Users currentUser = userRepo.findByUserName(userName);
         Posts post = postsRepo.findById(id)
                 .orElseThrow(() ->
                         new PostsNotFoundException("Post not found"));
@@ -132,8 +132,8 @@ public class LogicOfPosts {
         postsRepo.delete(post);
     }
 
-    public Posts updatePost(ObjectId id, PostDto postDto, String userEmail) {
-        Users currentUser = userRepo.findByUserEmail(userEmail);
+    public Posts updatePost(ObjectId id, PostDto postDto, String userName) {
+        Users currentUser = userRepo.findByUserName(userName);
         Posts posts = postsRepo.findById(id)
                 .orElseThrow(() -> new PostsNotFoundException("Post is not found"));
         if (!posts.getUserId().equals(currentUser.getId())) {
@@ -153,9 +153,9 @@ public class LogicOfPosts {
         return postsRepo.save(posts);
     }
 
-    public PostDetailDto getPostDetail(ObjectId postId, String userEmail) throws AccessDeniedException {
+    public PostDetailDto getPostDetail(ObjectId postId, String userName) throws AccessDeniedException {
 
-        Users currentUser = userRepo.findByUserEmail(userEmail);
+        Users currentUser = userRepo.findByUserName(userName);
         if (currentUser == null) {
             throw new UserNotFoundException("User not found");
         }
@@ -172,7 +172,7 @@ public class LogicOfPosts {
         }
 
         Users postOwner = userRepo.findById(post.getUserId()).orElse(null);
-        String authorEmail = postOwner != null ? postOwner.getUserEmail() : "unknown";
+        String authorEmail = postOwner != null ? postOwner.getUserName() : "unknown";
 
         long commentCount = commentRepo.countByPostId(postId);
         long reactionCount = reactionRepo.countByPostId(postId);
@@ -194,7 +194,7 @@ public class LogicOfPosts {
                     return new CommentResponseDetailDto(
                             comment.getId().toHexString(),
                             comment.getText(),
-                            commentUser != null ? commentUser.getUserEmail() : "unknown",
+                            commentUser != null ? commentUser.getUserName() : "unknown",
                             comment.getUpdatedAt()
                     );
                 })
@@ -206,7 +206,7 @@ public class LogicOfPosts {
 
                     return new ReactionResponseDetailDto(
                             reaction.getReactionType().name(),
-                            reactionUser != null ? reactionUser.getUserEmail() : "unknown",
+                            reactionUser != null ? reactionUser.getUserName() : "unknown",
                             reaction.getCreatedAt()
                     );
                 })
@@ -215,7 +215,7 @@ public class LogicOfPosts {
         return new PostDetailDto(postDto, commentDtos, reactionDtos);
     }
 
-    private String feedCacheKey(String userEmail, Pageable pageable) {
-        return "feed:" + userEmail + ":page:" + pageable.getPageNumber() + ":size:" + pageable.getPageSize();
+    private String feedCacheKey(String userName, Pageable pageable) {
+        return "feed:" + userName + ":page:" + pageable.getPageNumber() + ":size:" + pageable.getPageSize();
     }
 }

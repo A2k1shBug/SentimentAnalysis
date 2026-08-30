@@ -4,8 +4,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.RestClientResponseException;
 
 @Configuration
 public class AiConfig {

@@ -41,8 +41,8 @@ public class ReactionService {
         this.redisService = redisService;
     }
 
-    public PaginatedResponse<ReactionResponseDto> getAllReactions(String userEmail, Pageable pageable) {
-        Users user = userRepo.findByUserEmail(userEmail);
+    public PaginatedResponse<ReactionResponseDto> getAllReactions(String userName, Pageable pageable) {
+        Users user = userRepo.findByUserName(userName);
 
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
@@ -67,7 +67,7 @@ public class ReactionService {
 
                     return new ReactionResponseDto(
                             reaction.getPostId().toHexString(),
-                            reactionUser != null ? reactionUser.getUserEmail() : "unknown",
+                            reactionUser != null ? reactionUser.getUserName() : "unknown",
                             reaction.getReactionType(),
                             reaction.getCreatedAt()
                     );
@@ -85,8 +85,8 @@ public class ReactionService {
         return response;
     }
 
-    public void createReaction(ReactionDto dto, String userEmail) throws AccessDeniedException {
-        Users user = userRepo.findByUserEmail(userEmail);
+    public void createReaction(ReactionDto dto, String userName) throws AccessDeniedException {
+        Users user = userRepo.findByUserName(userName);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -112,7 +112,7 @@ public class ReactionService {
                 postRealtimePublisher.publishPostUpdate(
                         post.getId(),
                         "REACTION_DELETED",
-                        userEmail
+                        userName
                 );
                 return;
             }
@@ -121,7 +121,7 @@ public class ReactionService {
             r.setCreatedAt(LocalDateTime.now());
             reactionRepo.save(r);
             postRealtimePublisher.publishPostUpdate(post.getId(),
-                    "REACTION_UPDATED", userEmail);
+                    "REACTION_UPDATED", userName);
             return;
         }
 
@@ -137,7 +137,7 @@ public class ReactionService {
         postRealtimePublisher.publishPostUpdate(
                 post.getId(),
                 "REACTION_CREATED",
-                userEmail
+                userName
         );
     }
 

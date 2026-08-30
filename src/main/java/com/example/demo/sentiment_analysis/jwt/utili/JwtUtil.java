@@ -109,7 +109,7 @@ public class JwtUtil {
         }
     }
 
-    public void logoutAllDevices(String userEmail) {
-        refreshTokenRepo.deleteByUserEmail(userEmail);
+    public void logoutAllDevices(String userName) {
+        refreshTokenRepo.deleteByUserName(userName);
     }
 }

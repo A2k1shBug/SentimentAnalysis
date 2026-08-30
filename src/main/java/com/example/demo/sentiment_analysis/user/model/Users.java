@@ -21,7 +21,9 @@ public class Users {
     @Id
     private ObjectId id;
     @Indexed(unique = true)
-    private String userEmail;
+    private String userName;
+//    @Indexed(unique = true)
+//    private String userEmail;
     private String password;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;

@@ -17,12 +17,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String userEmail) {
-        Users byUserEmail = userRepo.findByUserEmail(userEmail);
-        if (byUserEmail!=null){
-            return User.builder().username(byUserEmail.getUserEmail())
-                    .password(byUserEmail.getPassword())
-                    .roles(byUserEmail.getRoles().toArray(new String[0])).build();
+    public UserDetails loadUserByUsername(String username) {
+        Users userRepoByUserName = userRepo.findByUserName(username);
+        if (userRepoByUserName!=null){
+            return User.builder().username(userRepoByUserName.getUserName())
+                    .password(userRepoByUserName.getPassword())
+                    .roles(userRepoByUserName.getRoles().toArray(new String[0])).build();
         }
         log.error("Error is happened due in UserNameNotFoundException");
         throw new UsernameNotFoundException("User Not found exception");

@@ -71,9 +71,9 @@ class UserServiceTest {
         PaginatedResponse<UserResponse> result = userService.getUserDb(pageable);
 
         assertEquals(2, result.getContent().size());
-        assertEquals("first@example.com", result.getContent().get(0).getUserEmail());
+        assertEquals("first@example.com", result.getContent().get(0).getUserName());
         assertEquals(firstCreatedAt, result.getContent().get(0).getDateTime());
-        assertEquals("second@example.com", result.getContent().get(1).getUserEmail());
+        assertEquals("second@example.com", result.getContent().get(1).getUserName());
         assertEquals(secondCreatedAt, result.getContent().get(1).getDateTime());
         assertEquals(0, result.getPageNumber());
         assertEquals(2, result.getPageSize());
@@ -95,7 +95,7 @@ class UserServiceTest {
         verify(userRepo).save(userCaptor.capture());
         Users savedUser = userCaptor.getValue();
         assertSame(savedUser, result);
-        assertEquals("new@example.com", savedUser.getUserEmail());
+        assertEquals("new@example.com", savedUser.getUserName());
         assertEquals(List.of("USER"), savedUser.getRoles());
         assertNotNull(savedUser.getDateTime());
         assertFalse("Strong1@".equals(savedUser.getPassword()));
@@ -251,7 +251,7 @@ class UserServiceTest {
         Users result = userService.newUserUpdate(userId, updateDto, "old@example.com");
 
         assertSame(existingUser, result);
-        assertEquals("updated@example.com", result.getUserEmail());
+        assertEquals("updated@example.com", result.getUserName());
         assertEquals("Updated1@", result.getPassword());
         verify(userRepo).save(existingUser);
     }
@@ -268,7 +268,7 @@ class UserServiceTest {
 
         Users result = userService.newUserUpdate(userId, updateDto, "old@example.com");
 
-        assertEquals("old@example.com", result.getUserEmail());
+        assertEquals("old@example.com", result.getUserName());
         assertEquals("Existing1@", result.getPassword());
         verify(userRepo).save(existingUser);
     }
@@ -285,7 +285,7 @@ class UserServiceTest {
 
         Users result = userService.newUserUpdate(userId, updateDto, "old@example.com");
 
-        assertEquals("old@example.com", result.getUserEmail());
+        assertEquals("old@example.com", result.getUserName());
         assertEquals("Existing1@", result.getPassword());
         verify(userRepo).save(existingUser);
     }

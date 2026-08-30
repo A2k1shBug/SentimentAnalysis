@@ -22,14 +22,14 @@ public class PostRealtimePublisher {
         this.reactionRepo = reactionRepo;
     }
 
-    public void publishPostUpdate(ObjectId postId, String eventType, String actorEmail) {
+    public void publishPostUpdate(ObjectId postId, String eventType, String userName) {
         long commentCount = commentRepo.countByPostId(postId);
         long reactionCount = reactionRepo.countByPostId(postId);
 
         PostRealtimeUpdateDto payload = new PostRealtimeUpdateDto(
                 postId.toHexString(),
                 eventType,
-                actorEmail,
+                userName,
                 commentCount,
                 reactionCount,
                 LocalDateTime.now()

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class CommentResponseDetailDto {
     String id;
     private String text;
-    private String userEmail;
+    private String userName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createAt;
 }

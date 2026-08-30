@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class PostRealtimeUpdateDto {
     private String postId;
     private String eventType;
-    private String actorEmail;
+    private String userName;
     private long commentCount;
     private long reactionCount;
 

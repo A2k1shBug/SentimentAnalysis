@@ -262,9 +262,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -289,9 +287,9 @@ public class CommentService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public PaginatedResponse<CommentResponseDto> getCommentByEmail(String userEmail, Pageable pageable) {
+    public PaginatedResponse<CommentResponseDto> getCommentByUserName(String userName, Pageable pageable) {
 
-        Users user = userRepo.findByUserEmail(userEmail);
+        Users user = userRepo.findByUserName(userName);
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
@@ -314,7 +312,7 @@ public class CommentService {
                     return new CommentResponseDto(
                             comment.getId().toHexString(),
                             comment.getPostId().toHexString(),
-                            commentUser != null ? commentUser.getUserEmail() : "unknown",
+                            commentUser != null ? commentUser.getUserName() : "unknown",
                             comment.getText(),
                             comment.getSentiment(),
                             comment.getConfidence(),
@@ -335,9 +333,9 @@ public class CommentService {
     }
 
     //    @Transactional
-    public CommentResponseDto newComment(CommentRequest commentDto, String userEmail) throws AccessDeniedException {
+    public CommentResponseDto newComment(CommentRequest commentDto, String userName) throws AccessDeniedException {
         try {
-            Users currentUser = userRepo.findByUserEmail(userEmail);
+            Users currentUser = userRepo.findByUserName(userName);
             if (currentUser == null) {
                 throw new UserNotFoundException("User not found");
             }
@@ -365,19 +363,20 @@ public class CommentService {
 
             Comment savedComment = commentRepo.save(comment);
             log.info("SAVING COMMENT ID: {}", savedComment.getId());
-            kafkaTemplate.send("comments-topic", savedComment.getId().toHexString(), savedComment.getId().toHexString() + "::"
+            kafkaTemplate.send("comments-topic", savedComment.getId().toHexString(),
+                    savedComment.getId().toHexString() + "::"
                     + savedComment.getText());
 
 
             String countKey = "comment:count:" + post.getId().toHexString();
             redisService.increment(countKey);
             postRealtimePublisher.publishPostUpdate(post.getId(),
-                    "COMMENT_CREATED", userEmail);
+                    "COMMENT_CREATED", userName);
 
             return new CommentResponseDto(
                     savedComment.getId().toHexString(),
                     savedComment.getPostId().toHexString(),
-                    currentUser.getUserEmail(),
+                    currentUser.getUserName(),
                     savedComment.getText(),
                     savedComment.getSentiment(),
                     savedComment.getConfidence(),
@@ -385,14 +384,14 @@ public class CommentService {
             );
 
         } catch (Exception e) {
-            log.error("Not created comment from {} ", userEmail, e);
+            log.error("Not created comment from {} ", userName, e);
             throw e;
         }
     }
 
-    public void removeComment(ObjectId id, String userEmail) throws AccessDeniedException {
+    public void removeComment(ObjectId id, String userName) throws AccessDeniedException {
         try {
-            Users user = userRepo.findByUserEmail(userEmail);
+            Users user = userRepo.findByUserName(userName);
             if (user == null) {
                 throw new UserNotFoundException("User not found");
             }
@@ -416,18 +415,18 @@ public class CommentService {
             postRealtimePublisher.publishPostUpdate(
                     post.getId(),
                     "COMMENT_DELETED",
-                    userEmail
+                    userName
             );
 
         } catch (Exception e) {
-            log.error("Failed to delete comment {} by user {}", id, userEmail, e);
+            log.error("Failed to delete comment {} by user {}", id, userName, e);
             throw e;
         }
     }
 
-    public CommentResponseDto  updateComment(ObjectId id, CommentRequest commentDto, String userEmail) throws AccessDeniedException {
+    public CommentResponseDto  updateComment(ObjectId id, CommentRequest commentDto, String userName) throws AccessDeniedException {
         try {
-            Users user = userRepo.findByUserEmail(userEmail);
+            Users user = userRepo.findByUserName(userName);
             if (user == null) {
                 throw new UserNotFoundException("User not found");
             }
@@ -462,7 +461,7 @@ public class CommentService {
             return new CommentResponseDto(
                     savedComment.getId().toHexString(),
                     savedComment.getPostId().toHexString(),
-                    user.getUserEmail(),
+                    user.getUserName(),
                     savedComment.getText(),
                     savedComment.getSentiment(),
                     savedComment.getConfidence(),
@@ -471,7 +470,7 @@ public class CommentService {
 
 
         } catch (Exception e) {
-            log.error("Failed to update comment {} by user {}", id, userEmail, e);
+            log.error("Failed to update comment {} by user {}", id, userName, e);
             throw e;
         }
     }

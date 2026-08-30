@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class ReactionResponseDto {
     private String postId;
 
-    private String userEmail;
+    private String userName;
 
     private ReactionType reactionType;
 
