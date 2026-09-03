@@ -1,6 +1,7 @@
 package com.example.demo.sentiment_analysis.user.service;
 
 
+import com.example.demo.sentiment_analysis.exception.UsernameAlreadyExistsException;
 import com.example.demo.sentiment_analysis.user.dto.UserDto;
 import com.example.demo.sentiment_analysis.exception.UserNotFoundException;
 import com.example.demo.sentiment_analysis.exception.WeakPasswordException;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Slf4j
@@ -64,17 +66,27 @@ public class UserService {
         return response;
     }
 
-    @Transactional
     public Users newUserCreate(UserDto userInfo) {
 
-       validatePassword(userInfo.getPassword());
-        Users users = new Users();
-        users.setRoles(List.of("USER"));
-        users.setPassword(encoder.encode(userInfo.getPassword()));
-        users.setUserName(userInfo.getUserName());
-        users.setDateTime(LocalDateTime.now());
-        return userRepo.save(users);
+        validatePassword(userInfo.getPassword());
 
+        if (userRepo.existsByUserName(userInfo.getUserName())) {
+            throw new UsernameAlreadyExistsException(
+                    "Username already exists"
+            );
+        }
+        Users users = new Users();
+
+        users.setRoles(List.of("USER"));
+
+        users.setPassword(
+                encoder.encode(userInfo.getPassword())
+        );
+        users.setUserName(userInfo.getUserName());
+
+        users.setDateTime(LocalDateTime.now());
+
+        return userRepo.save(users);
     }
 
     // /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -164,5 +176,29 @@ public class UserService {
             throw new UserNotFoundException("User is not found");
         }
         return user;
+    }
+
+    public String suggestUsername(String userName) {
+
+        if (!userRepo.existsByUserName(userName)) {
+            return userName;
+        }
+
+        return generateUniqueUsername(userName);
+    }
+
+    public String generateUniqueUsername(String userName) {
+
+        String newUsername = userName;
+
+        while (userRepo.existsByUserName(newUsername)) {
+
+            int randomNumber = ThreadLocalRandom.current()
+                    .nextInt(100, 1000);
+
+            newUsername = userName + randomNumber;
+        }
+
+        return newUsername;
     }
 }

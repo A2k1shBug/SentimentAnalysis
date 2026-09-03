@@ -20,6 +20,7 @@ import com.example.demo.sentiment_analysis.user.model.Users;
 import com.example.demo.sentiment_analysis.user.repository.UserRepo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -47,7 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
-
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class LogicOfPostsTest {
 

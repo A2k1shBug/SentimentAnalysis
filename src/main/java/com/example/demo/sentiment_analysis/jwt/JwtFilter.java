@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
-
 import java.io.IOException;
 
 @Slf4j
@@ -32,7 +31,9 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+
         return path.startsWith("/api/auth/login")
+                || path.startsWith("/api/auth/suggest-username")
                 || path.startsWith("/api/auth/refresh")
                 || path.startsWith("/api/auth/logout")
                 || path.startsWith("/api/auth/logout-all");
@@ -43,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader =request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
         String username = null;
 

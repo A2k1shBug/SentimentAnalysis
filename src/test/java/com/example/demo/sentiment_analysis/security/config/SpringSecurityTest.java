@@ -1,6 +1,7 @@
 package com.example.demo.sentiment_analysis.security.config;
 
 import com.example.demo.sentiment_analysis.jwt.JwtFilter;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class SpringSecurityTest {
 

@@ -6,6 +6,7 @@ import com.example.demo.sentiment_analysis.global_handler_exception.exception_dt
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -114,15 +118,49 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponseDto> handleAnyOther(
-            Exception ex,
+    public ResponseEntity<ExceptionResponseDto> handleException(
+            Exception e,
             HttpServletRequest request) {
+
+        log.error("Exception type: {}", e.getClass().getName());
+        log.error("Exception message: {}", e.getMessage());
+        log.error("Full exception", e);
+
         ExceptionResponseDto error = new ExceptionResponseDto(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Something went wrong",
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionResponseDto> handleValidationException(
+            MethodArgumentNotValidException e,
+            HttpServletRequest request) {
+
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+
+        log.warn("Validation failed: {}", message);
+
+        ExceptionResponseDto error = new ExceptionResponseDto(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
     }
 }

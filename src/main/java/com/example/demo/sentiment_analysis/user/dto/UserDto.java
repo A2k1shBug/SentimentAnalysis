@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDto {
 
-
+    @NotBlank(message = "Username must not be blank")
     @Pattern(
-            regexp = "^[a-zA-Z0-9_]{3,20}$",
-            message = "Username must be 3-20 characters and contain only letters, numbers or underscore"
+            regexp = "^[a-zA-Z]+(?: [a-zA-Z]+)*(?:[0-9]+)?$",
+            message = "Username must contain a valid name with optional numbers"
     )
     private String userName;
 

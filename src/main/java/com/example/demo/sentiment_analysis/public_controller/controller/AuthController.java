@@ -48,6 +48,14 @@ public class AuthController {
         this.refreshTokenRepo = refreshTokenRepo;
     }
 
+    @GetMapping("/suggest-username")
+    public ResponseEntity<String> suggestUsername(
+            @RequestParam String userName) {
+        String suggestedUsername =
+                userService.suggestUsername(userName);
+        return ResponseEntity.ok(suggestedUsername);
+    }
+
     @PostMapping("/sign_up")
     public ResponseEntity<Users> createUser(@Valid @RequestBody UserDto userDto) {
         Users users = userService.newUserCreate(userDto);
